@@ -1,0 +1,3 @@
+- Finish `Renderer.render`, figuring out graphics library
+- Write `Camera`, `SceneLoader` and `Main`
+- Debug to hell and back! Figure out the import system re: types.

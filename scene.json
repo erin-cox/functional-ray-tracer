@@ -1,0 +1,52 @@
+{
+    "scene":{
+        "ambient_light":{
+            "color":"#777777",
+            "intensity":100,
+        }
+        "objects":[
+            {
+                "type":"point_light",
+                "position":[-1.5, -4.5, 2],
+                "color":"#E1F2EF",
+                "intensity":450
+            },
+            {
+                "type":"sphere",
+                "position":[0.5,-0.26398,3.51805],
+                "radius":0.5,
+                "color":"#295B7C"
+            },
+            {
+                "type":"sphere",
+                "position":[-0.2,0.01504,4.99187],
+                "radius":0.5,
+                "color":"#295B7C"
+            },
+            {
+                "type":"sphere",
+                "position":[-0.9,0.29406, 6.46569],
+                "radius":0.5,
+                "color":"#295B7C"
+            },
+            {
+                "type":"sphere",
+                "position":[-1.6,0.57308,7.93951],
+                "radius":0.5,
+                "color":"#295B7C"
+            },
+            {
+                "type":"plane",
+                "position":[0.0,-0.47623,5.085],
+                "normal":[0.0,0.9825,-0.186],
+                "color":"#82898F"
+            },
+            {
+                "type":"plane",
+                "position":[0.0,0.0,12.0],
+                "normal":[0.0,0.0,-1.0],
+                "color":"#516E7E"
+            },
+        ]
+    }
+}
