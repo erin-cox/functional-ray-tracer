@@ -5,3 +5,4 @@ data RayHit = RayHit { objectHit :: SceneObject
                      , location  :: Vec3
                      , normal    :: Vec3
                      }
+
