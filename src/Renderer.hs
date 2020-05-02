@@ -3,24 +3,16 @@ module Renderer (newRenderer, render, tonemap) where
 import Data.Maybe
 import Graphics.Image as I
 
-import Types
-import qualified Vec3
-import qualified Color
-import qualified Ray
-import qualified Scene
-import qualified RayHit
-import qualified SceneObject
+data Renderer = Renderer {
+      width_px  :: Int,
+      height_px :: Int,
+      bounces   :: Int,
+      bg_color  :: Color,
+}
 
-data Renderer = Renderer { width_px        :: Int
-                         , height_px       :: Int
-                         , bias            :: Float
-                         , bounces         :: Int
-                         , backgroundColor :: Color
-                         }
-
-defaultBias = 0.0001
-defaultBounces = 3
-defaultBGColor = Color.grayScale 0.001
+bias = 1.0e-6
+default_bounces = 4
+default_bg_color = color_grayscale 0.001
 
 newRenderer :: Int -> Int -> Renderer
 newRenderer w h = Renderer { width_px        = w
@@ -29,6 +21,20 @@ newRenderer w h = Renderer { width_px        = w
                            , bounces         = defaultBounces
                            , backgroundColor = defaultBGColor
                            }
+
+trace_ray :: Ray -> Scene -> Color
+trace_ray ray scene = trace_ray' ray scene default_bounces
+
+trace_ray' :: Ray -> Scene -> Int -> Color
+trace_ray' ray scene bounces_left = case closest_intersection ray scene of
+      Nothing -> default_bg_color
+      Just (RayHit {
+            rayhit_object   = object,
+            rayhit_position = position,
+            rayhit_normal   = normal
+      }) ->
+            | bounces_left == 0 = direct_illumination
+            | otherwise = direct_illumination +
 
 trace :: Renderer -> Ray -> Scene -> Int -> Color
 trace renderer ray scene bouncesLeft = case Scene.closestIntersection ray scene of

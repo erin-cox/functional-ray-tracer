@@ -2,7 +2,7 @@ module Stuff (
     Ray(..), new_ray, evaluate_ray_at,
     SceneObject(..), Shape(..), Material(..),
     new_sphere, new_plane, get_object_normal,
-    RayHit(..), closest_intersection,
+    RayHit(..), object_ray_intersection,
     PointLight(..), new_point_light, get_illumination
 ) where
 
@@ -91,8 +91,8 @@ data RayHit = RayHit {
 
 -- Returns a Maybe RayHit describing the closest intersection of a ray with
 -- an object, or Nothing if the ray does not intersect the object.
-closest_intersection :: Ray -> SceneObject -> Maybe RayHit
-closest_intersection ray@(Ray ray_origin ray_dir) object =
+object_ray_intersection :: Ray -> SceneObject -> Maybe RayHit
+object_ray_intersection ray@(Ray ray_origin ray_dir) object =
     case object_shape object of
         Sphere centre radius ->
             | null solutions = Nothing

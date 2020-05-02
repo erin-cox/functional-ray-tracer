@@ -1,9 +1,10 @@
 module DVec3 where
 
-data DVec3 = DVec3 { x :: Double
-                 , y :: Double
-                 , z :: Double
-                 }
+data DVec3 = DVec3 {
+    dvec3_x :: Double,
+    dvec3_y :: Double,
+    dvec3_z :: Double,
+}
 
 dvec3_uniform :: Double -> DVec3
 dvec3_uniform a = DVec3 a a a

@@ -16,4 +16,4 @@ closestIntersection :: Ray -> Scene -> Maybe RayHit
 closestIntersection ray (Scene { objects = os })
     | null intersections = Nothing
     | otherwise          = Just $ minimum intersections
-    where intersections  = map (\o -> SceneObject.intersectionWith o ray) os
+    where intersections  = map (\o -> ray_intersection_with o ray) os
