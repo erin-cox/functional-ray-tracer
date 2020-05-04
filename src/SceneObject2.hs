@@ -22,29 +22,25 @@ new_ray :: DVec3 -> DVec3 -> Ray
 new_ray origin direction = Ray origin (Vec3.normalize direction)
 
 -- Returns the position of the ray with the scale parameter evaluated at s.
-evaluate_ray_at :: Ray -> Float -> VDec3
+evaluate_ray_at :: Ray -> Double -> VDec3
 evaluate_ray_at (Ray origin direction) scalar =
     origin `dvec3_add` (dvec3_scale direction scalar)
 
 data SceneObject = SceneObject {
-    object_shape    :: Shape,
-    object_color    :: Color,
-    object_material :: Material,
+    object_shape :: Shape,
+    object_color :: Color,
+    object_phong_kD     :: Double,
+    object_phong_kS     :: Double,
+    object_phong_alpha  :: Double,
+    object_reflectivity :: Double,
 }
 
 data Shape = Sphere {
     sphere_centre :: DVec3,
-    sphere_radius :: Float,
+    sphere_radius :: Double,
 } | Plane {
     plane_point  :: Vec3,
-    plane_normal :: Float,
-}
-
-data Material = Material {
-    phong_kD     :: Float,
-    phong_kS     :: Float,
-    phong_alpha  :: Float,
-    reflectivity :: Float,
+    plane_normal :: Double,
 }
 
 default_kD = 0.8
@@ -52,7 +48,7 @@ default_kS = 1.2
 default_alpha = 10.0
 default_reflectivity = 0.3
 
-new_sphere :: DVec3 -> Float -> Color -> SceneObject
+new_sphere :: DVec3 -> Double -> Color -> SceneObject
 new_sphere centre radius color =
     SceneObject {
         object_shape = Sphere centre radius,
@@ -64,7 +60,7 @@ new_sphere centre radius color =
             default_reflectivity
     }
 
-new_plane :: DVec3 -> Float -> Color -> SceneObject
+new_plane :: DVec3 -> Double -> Color -> SceneObject
 new_plane point normal color =
     SceneObject {
         object_shape = Plane point normal,
@@ -84,7 +80,7 @@ get_object_normal object position = case object_shape object of
 
 data RayHit = RayHit {
     rayhit_object   :: SceneObject,
-    rayhit_distance :: Float,
+    rayhit_distance :: Double,
     rayhit_position :: DVec3,
     rayhit_normal   :: DVec3,
 }
