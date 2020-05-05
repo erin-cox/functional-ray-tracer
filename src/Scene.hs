@@ -8,8 +8,8 @@ import qualified PointLight
 import qualified Color
 
 data Scene = Scene { objects      :: [SceneObject]
-                   , pointLights  :: [PointLight]
-                   , ambientLight :: Color
+                   , point_lights  :: [PointLight]
+                   , scene_ambient_light :: Color
                    }
 
 closestIntersection :: Ray -> Scene -> Maybe RayHit

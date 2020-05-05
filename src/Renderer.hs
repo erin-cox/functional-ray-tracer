@@ -58,71 +58,57 @@ trace renderer ray scene bouncesLeft = case Scene.closestIntersection ray scene 
 -- Illuminates a point on the surface of an object with Blinn-Phong shading.
 blinn_phong :: Scene -> SceneObject -> DVec3 -> DVec3 -> DVec3 -> Color
 blinn_phong scene object position normal camera =
-      color_add ambient $ foldr color_add color_black $
-            map illuminate_light lights
+      ambient_term `color_add`
+            (foldr color_add color_black $ map illuminate_light lights)
       where
-            -- List of lights in the scene
+            -- Scene properties
             lights = scene_lights scene
-            -- Ambient light of the scene
-            ambient = color_scale (scene_ambient_light scene) phong_k_a
+            i_a = scene_ambient_light scene
             -- Object properties
-            obj_color   = object_color object
-            phong_k_d   = object_phong_k_d object
-            phong_k_s   = object_phong_k_s object
-            phong_k_a   = object_phong_k_a object
-            phong_alpha = object_phong_alpha object
-            -- Illuminate
-
-illuminate_light light
-      | shadow_ray_distance < light_distance = 0
-      | otherwise = diffuse + specular where
-            l = dvec3_normalize $ light_position light `dvec3_sub` p
-            r = dvec3_normalize $ l `dvec3_reflect_in` n
-            v = dvec3_normalize $ camera `dvec3_sub` position
             c_diff = object_color object
-            c_spec = light_color light
-            i_d
-            i_s
-            shadow_ray = new_ray (p `dvec3_add` (l `dvec3_scale` bias)) l
-            shadow_ray_distance = rayhit_distance $
-                  closest_intersection scene shadow_ray
-            light_distance = dvec3_magnitude $
-                  light_position light `dvec3_sub` p
-            diffuse = c_diff `color_scale` phong_k_d `color_scale` i
-                  `color_scale` (max 0.0 $ n `dvec3_dot` l)
-            specular = c_diff `color_scale` phong_k_s `color_scale` i
-                  `color_scale` (max 0.0 $ r `dvec3_dot` v) ** phong_alpha
+            k_a   = object_phong_k_a object
+            k_s   = object_phong_k_s object
+            k_d   = object_phong_k_d object
+            alpha = object_phong_alpha object
+            -- Vectors
+            n = normal
+            p = position
+            -- Not directly used, so no need to normalize
+            v = camera `dvec3_sub` p
+            ambient_term = get_ambient_term k_a c_diff i_a
+            illuminate_light light
+            | shadow_ray_distance < light_distance = color_black
+            | otherwise = diffuse_term + specular_term where
+                  -- Vectors
+                  c_spec = light_color light
+                  q_i = light_position light
+                  l_i = dvec3_normalize $ q_i `dvec3_sub` p
+                  h_i = dvec3_normalize $ l_i `dvec3_add` v
+                  i_i = get_illumination light p
+                  -- Shadow calculations
+                  shadow_ray = new_ray (p `dvec3_add`
+                        (l_i `dvec3_scale` bias)) l_i
+                  shadow_ray_distance = rayhit_distance $
+                        closest_intersection scene shadow_ray
+                  light_distance = dvec3_magnitude $ q_i `dvec3_sub` p
+                  -- Diffuse and specular term calculations
+                  diffuse_term = get_diffuse_term k_d c_diff i_i n l_i
+                  specular_term = get_specular_term k_s c_spec i_i n h_i
 
-ambient_light :: Color -> Color -> Color
-ambient_light diffuse ambient = diffuse * ambient
+get_ambient_term :: DVec3 -> Color -> Color -> Color
+get_ambient_term k_a c_diff i_a =
+      k_a `color_scale_dvec3` c_diff `color_scale` i_a
 
-diffuse_light :: Color -> Color -> DVec3
+get_diffuse_term :: DVec3 -> Color -> Color -> DVec3 -> DVec3 -> Color
+get_diffuse_term k_d c_diff i_i n l_i =
+      k_d `color_scale_dvec3` c_diff `color_scale` i_i `color_scale`
+            (max 0.0 $ n `dvec3_dot` l_i)
 
+get_specular_term :: DVec3 -> Color -> Color -> DVec3 -> DVec3 -> Color
+get_specular_term k_s c_spec i_i n h_i =
+      k_s `color_scale_dvec3` c_spec `color_scale` i_i `color_scale`
+            (max 0.0 $ n `dvec3_dot` h_i) ** alpha
 
-
-
-
--- p, n, o: point of contact, normal to point of contact, origin of ray
-illuminate :: Renderer -> Scene -> SceneObject -> Vec3 -> Vec3 -> Vec3 -> Color
-illuminate renderer scene object p n o = foldr Color.add Color.black $ illuminateLight (Scene.pointLights scene)
-  where c_diff = SceneObject.color object
-        i_a = Scene.ambientLight scene
-        k_d = SceneObject.phong_kD object
-        k_s = SceneObject.phong_kS object
-        alpha = SceneObject.phongAlpha object
-        illuminateLight light
-          | shadowRayDistance < distanceToLight = ambient
-          | otherwise                           = ambient + diffuse + specular
-          where shadowRayDistance = RayHit.distance $ Scene.closestIntersection scene shadowRay
-                shadowRay = newRay (p `Vec3.add` (l `Vec3.scale` (bias renderer))) l
-                distanceToLight = Vec3.magnitude $ (PointLight.position light) `Vec3.sub` p
-                ambient = Color.scale c_diff i_a
-                diffuse = c_diff `Color.scale` k_d `Color.scale` i `Color.scale` (max 0.0 $ n `Vec3.dot` l)
-                specular = c_spec `Color.scale` k_s `Color.scale` i `Color.scale` ((max 0.0 $ r `Vec3.dot` v) ** alpha)
-                l = Vec3.normalize $ (PointLight.position light) `Vec3.sub` p
-                r = Vec3.normalize $ l `Vec3.reflectIn` n
-                v = Vec3.normalize $ o `Vec3.sub` p
-                c_spec = PointLight.color light
 
 render renderer scene = -- create image of array of pixels
   where camera = Camera.newCamera (width_px renderer) (height_px renderer)

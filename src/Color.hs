@@ -1,12 +1,12 @@
 module Color (
-    Color(..),add, addFloat, sub, subFloat, scale, power,
+    Color(..),add, addDouble, sub, subDouble, scale, power,
     black, white, red, green, blue, grayScale
 ) where
 
 
-data Color = Color { r :: Float
-                   , g :: Float
-                   , b :: Float
+data Color = Color { r :: Double
+                   , g :: Double
+                   , b :: Double
                    }
 
 import Data.Bits (shiftL, (|.|))
@@ -23,27 +23,34 @@ fromText t = fromInts r g b
     where [r, g, b] = Text.map (from)$ Text.chunksOf 2 $ Text.drop 1 t
 
 add :: Color -> Color -> Color
-add (Color r1 g1 b1) (Color r2 g2 b2) = Color (r1 + r2) (g1 + g2) (b3 + b3)
+add (Color r1 g1 b1) (Color r2 g2 b2) = Color (r1 + r2) (g1 + g2) (b1 + b2)
 
-addFloat :: Color -> Float -> Color
+addDouble :: Color -> Double -> Color
 add (Color r g b) f = Color (r + f) (g + f) (b + f)
 
 sub :: Color -> Color -> Color
-sub (Color r1 g1 b1) (Color r2 g2 b2) = Color (r1 - r2) (g1 - g2) (b3 - b3)
+sub (Color r1 g1 b1) (Color r2 g2 b2) = Color (r1 - r2) (g1 - g2) (b1 - b2)
 
-subFloat :: Color -> Float -> Color
-subFloat c f = addFloat c (-f)
+subDouble :: Color -> Double -> Color
+subDouble c f = addDouble c (-f)
 
-scale :: Color -> Float -> Color
-scale (Color r g b) s = Color (s * r) (s * g) (s * b)
+scale :: Double -> Color -> Color
+scale s (Color r g b) = Color (s * r) (s * g) (s * b)
 
-power :: Color -> Float -> Color
+color_scale_dvec3 :: DVec3 -> Color -> Color
+color_scale_dvec3 (DVec3 x y z) (Color r g b) = Color (x * r) (y * g) (z * b)
+
+color_mult :: Color -> Color -> Color
+color_mult (Color r1 g1 b1) (Color r2 g2 b2) =
+    Color (r1 * r2) (g1 * g2) (b1 * b2)
+
+power :: Color -> Double -> Color
 power (Color r g b) a = Color (r ** a) (g ** a) (b ** a)
 
 inv :: Color -> Color
 inv (Color r g b) = Color (1 / r) (1 / g) (1 / b)
 
-convertToByte :: Float -> Int
+convertToByte :: Double -> Int
 convertToByte f = floor $ (255 *) $ max 0 $ min 1 f
 
 toRGB :: Color -> Int
@@ -55,5 +62,5 @@ red   = Color 1.0 0.0 0.0
 green = Color 0.0 1.0 0.0
 blue  = Color 0.0 0.0 1.0
 
-grayScale :: Float -> Color
+grayScale :: Double -> Color
 grayScale a = Color a a a

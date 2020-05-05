@@ -22,15 +22,16 @@ new_ray :: DVec3 -> DVec3 -> Ray
 new_ray origin direction = Ray origin (Vec3.normalize direction)
 
 -- Returns the position of the ray with the scale parameter evaluated at s.
-evaluate_ray_at :: Ray -> Double -> VDec3
+evaluate_ray_at :: Ray -> Double -> DVec3
 evaluate_ray_at (Ray origin direction) scalar =
     origin `dvec3_add` (dvec3_scale direction scalar)
 
 data SceneObject = SceneObject {
-    object_shape :: Shape,
-    object_color :: Color,
-    object_phong_kD     :: Double,
-    object_phong_kS     :: Double,
+    object_shape        :: Shape,
+    object_color        :: Color,
+    object_phong_kA     :: DVec3,
+    object_phong_kD     :: DVec3,
+    object_phong_kS     :: DVec3,
     object_phong_alpha  :: Double,
     object_reflectivity :: Double,
 }
@@ -39,37 +40,38 @@ data Shape = Sphere {
     sphere_centre :: DVec3,
     sphere_radius :: Double,
 } | Plane {
-    plane_point  :: Vec3,
+    plane_point  :: DVec3,
     plane_normal :: Double,
 }
 
-default_kD = 0.8
-default_kS = 1.2
+default_kA = 1.0
+default_kD = 0.7
+default_kS = 0.3
 default_alpha = 10.0
 default_reflectivity = 0.3
 
 new_sphere :: DVec3 -> Double -> Color -> SceneObject
 new_sphere centre radius color =
     SceneObject {
-        object_shape = Sphere centre radius,
-        object_color = color,
-        object_material = Material
-            default_kD
-            default_kS
-            default_alpha
-            default_reflectivity
+        object_shape        = Sphere centre radius,
+        object_color        = color,
+        object_phong_kA     = default_kA,
+        object_phong_kD     = default_kD,
+        object_phong_kS     = default_kS,
+        object_phong_alpha  = default_alpha,
+        object_reflectivity = default_reflectivity
     }
 
 new_plane :: DVec3 -> Double -> Color -> SceneObject
 new_plane point normal color =
     SceneObject {
-        object_shape = Plane point normal,
-        object_color = color,
-        object_material = Material
-            default_kD
-            default_kS
-            default_alpha
-            default_reflectivity
+        object_shape        = Sphere centre radius,
+        object_color        = color,
+        object_phong_kA     = default_kA,
+        object_phong_kD     = default_kD,
+        object_phong_kS     = default_kS,
+        object_phong_alpha  = default_alpha,
+        object_reflectivity = default_reflectivity
     }
 
 -- Returns the normal vector to a scene object at a given position vector.
@@ -122,15 +124,19 @@ object_ray_intersection ray@(Ray ray_origin ray_dir) object =
                 normal = get_object_normal object position
 
 data PointLight = PointLight {
-    light_position  :: DVec3
-    light_color     :: Color
+    light_position  :: DVec3,
+    light_color     :: Color,
     light_intensity :: Double
 }
 
 new_point_light :: DVec3 -> Color -> Double -> PointLight
 new_point_light pos color intensity = PointLight pos color $ max 0.0 intensity
 
-get_illumination :: Double -> PointLight -> Color
-get_illumination distance light =
-    dvec3_scale (light_color light)
-        (light_intensity l / 4 * pi * distance * distance)
+-- Gets the illumination of a light at some point.
+get_illumination :: PointLight -> DVec3 -> Color
+get_illumination light point =
+    color_scale (light_color light)
+        (light_intensity light / 4 * pi * sq_distance)
+    where
+        sq_distance = dist `dvec3_dot` dist
+        dist = point `dvec3_sub` light_position light
