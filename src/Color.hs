@@ -13,15 +13,6 @@ import Data.Bits (shiftL, (|.|))
 import qualified Data.Text (Text, chunksOf, drop) as Text
 import Data.Text.Read (hexadecimal)
 
-fromInts :: Int -> Int -> Int -> Color
-fromInts ri gi bi = Color r g b
-    where [r, g, b] = map (\x -> (max 0 $ min 255 x) / 255) [ri, gi, bi]
-
--- Imports a color Text of the form "#RRGGBB". TODO: Fix this!!
-fromText :: Text.Text -> Color
-fromText t = fromInts r g b
-    where [r, g, b] = Text.map (from)$ Text.chunksOf 2 $ Text.drop 1 t
-
 add :: Color -> Color -> Color
 add (Color r1 g1 b1) (Color r2 g2 b2) = Color (r1 + r2) (g1 + g2) (b1 + b2)
 
@@ -54,7 +45,7 @@ convertToByte :: Double -> Int
 convertToByte f = floor $ (255 *) $ max 0 $ min 1 f
 
 toRGB :: Color -> Int
-toRGB (Color r g b) = shiftL r 16 (|.|) shiftL g 8 (|.|) shiftL b 0
+toRGB (Color r g b) = shiftL r 16 |.| shiftL g 8 |.| shiftL b 0
 
 black = Color 0.0 0.0 0.0
 white = Color 1.0 1.0 1.0

@@ -26,8 +26,8 @@ dvec3_sub (DVec3 x1 y1 z1) (DVec3 x2 y2 z2) =
 dvec3_add_scalar :: DVec3 -> Double -> DVec3
 dvec3_add_scalar v f = dvec3_add_scalar v (-f)
 
-dvec3_scale :: DVec3 -> Double -> DVec3
-dvec3_scale (DVec3 x y z) s = DVec3 (s * x) (s * y) (s * z)
+dvec3_scale :: Double -> DVec3 -> DVec3
+dvec3_scale s (DVec3 x y z) = DVec3 (s * x) (s * y) (s * z)
 
 dvec3_power :: DVec3 -> Double -> DVec3
 dvec3_power (DVec3 x y z) a = DVec3 (x ** a) (y ** a) (z ** a)

@@ -12,6 +12,8 @@ import Utils (solveQuadratic)
 import DVec3
 import Color
 
+------------------------- Rays ----------------------------
+
 data Ray = Ray {
     ray_origin    :: DVec3,
     ray_direction :: DVec3,
@@ -19,12 +21,14 @@ data Ray = Ray {
 
 -- Smart constructor
 new_ray :: DVec3 -> DVec3 -> Ray
-new_ray origin direction = Ray origin (Vec3.normalize direction)
+new_ray origin direction = Ray origin $ vec3_normalize direction
 
 -- Returns the position of the ray with the scale parameter evaluated at s.
 evaluate_ray_at :: Ray -> Double -> DVec3
 evaluate_ray_at (Ray origin direction) scalar =
     origin `dvec3_add` (dvec3_scale direction scalar)
+
+------------------------- Scene objects ----------------------------
 
 data SceneObject = SceneObject {
     object_shape        :: Shape,
@@ -122,6 +126,8 @@ object_ray_intersection ray@(Ray ray_origin ray_dir) object =
                         (dvec3_dot ray_dir normal)
                 position = evaluate_ray_at ray distance
                 normal = get_object_normal object position
+
+------------------------- Point lights ----------------------------
 
 data PointLight = PointLight {
     light_position  :: DVec3,

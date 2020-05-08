@@ -3,10 +3,10 @@
         "ambient_light":{
             "color":"#777777",
             "intensity":100,
-        }
+        },
         "objects":[
             {
-                "type":"point_light",
+                "type":"light",
                 "position":[-1.5, -4.5, 2],
                 "color":"#E1F2EF",
                 "intensity":450
